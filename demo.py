@@ -37,6 +37,7 @@ from processes.area import Area
 from processes.bboxinout import Box
 from processes.jsonprocess import TestJson
 
+from processes.echo import Echo
 
 app = flask.Flask(__name__)
 
@@ -49,7 +50,8 @@ processes = [
     Buffer(),
     Area(),
     Box(),
-    TestJson()
+    TestJson(),
+    Echo()
 ]
 
 # For the process list on the home page
