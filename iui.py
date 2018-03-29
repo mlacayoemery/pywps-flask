@@ -81,3 +81,7 @@ def process_generator():
 ##                                       True),),
 ##                        {})
 ##                                      
+
+
+if __name__ == "__main__":
+    process_generator()
