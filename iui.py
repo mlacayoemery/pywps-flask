@@ -67,7 +67,7 @@ def process_generator():
                                            True,
                                            True))
 
-            return processes
+    return processes
 
 ##        subclass = type(identifier,
 ##                        (pywps.Process(handler,
