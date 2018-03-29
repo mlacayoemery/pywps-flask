@@ -73,6 +73,7 @@ if __name__ == "__main__":
     print processes
     # This is, how you start PyWPS instance
     service = Service(processes, ['pywps.cfg'])
+    print "PyWPS instance running"
 
 
     @app.route("/")

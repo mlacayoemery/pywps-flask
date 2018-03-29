@@ -10,7 +10,7 @@ import pywps
 #import pywps.UOM
 
 
-def handler(self, request, response):
+def _handler(self, request, response):
     response.outputs['response'].data = self.identifier
     response.outputs['response'].uom = pywps.UOM('unity')
 
@@ -57,7 +57,7 @@ def process_generator():
                 print "\t%s" % p.args_key
 
             print "Generating PyWPS process"
-            processes.append(pywps.Process(handler,
+            processes.append(pywps.Process(_handler,
                                            identifier,
                                            title,
                                            abstract,
@@ -87,5 +87,5 @@ if __name__ == "__main__":
     print "Processing InVEST"
     processes = process_generator()
     print "Creating PyWPS service"
-    service = pywps.Service(processes, ['pywps.cfg'])
+    service = pywps.Service(processes)
     print "Complete"
