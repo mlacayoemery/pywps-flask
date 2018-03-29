@@ -39,6 +39,8 @@ from processes.jsonprocess import TestJson
 
 from processes.echo import Echo
 
+import iui
+
 if __name__ == "__main__":
     app = flask.Flask(__name__)
 
@@ -54,6 +56,8 @@ if __name__ == "__main__":
         TestJson(),
         Echo()
     ]
+
+    processes.extend(iui.process_generator())
 
     # For the process list on the home page
 
