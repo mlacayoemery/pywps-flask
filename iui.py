@@ -84,4 +84,8 @@ def process_generator():
 
 
 if __name__ == "__main__":
-    process_generator()
+    print "Processing InVEST"
+    processes = process_generator()
+    print "Creating PyWPS service"
+    service = pywps.Service(processes, ['pywps.cfg'])
+    print "Complete"

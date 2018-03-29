@@ -57,16 +57,20 @@ if __name__ == "__main__":
         Echo()
     ]
 
+    print "Extending default process list with InVEST"
     processes.extend(iui.process_generator())
+    print "Finished processing InVEST"
 
     # For the process list on the home page
-
+    print "Generating metadata for home page"
     process_descriptor = {}
     for process in processes:
         abstract = process.abstract
         identifier = process.identifier
         process_descriptor[identifier] = abstract
 
+    print "Starting PyWPS instance"
+    print processes
     # This is, how you start PyWPS instance
     service = Service(processes, ['pywps.cfg'])
 
