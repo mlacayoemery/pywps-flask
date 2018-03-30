@@ -58,14 +58,14 @@ def process_generator():
 
             print "Generating PyWPS process"
             processes.append(pywps.Process(_handler,
-                                           identifier,
-                                           title,
-                                           abstract,
-                                           version,
-                                           inputs,
-                                           outputs,
-                                           True,
-                                           True))
+                                           identifier=identifier,
+                                           title=title,
+                                           abstract=abstract,
+                                           version=version,
+                                           inputs=inputs,
+                                           outputs=outputs,
+                                           store_supported=True,
+                                           status_supported=True))
 
     return processes
 

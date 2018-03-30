@@ -41,6 +41,8 @@ from processes.echo import Echo
 
 import iui
 
+#http://127.0.0.1:5000/wps?REQUEST=GetCapabilities&SERVICE=WPS&VERSION=1.0.0
+
 if __name__ == "__main__":
     app = flask.Flask(__name__)
 
