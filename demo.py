@@ -41,7 +41,7 @@ from processes.jsonprocess import TestJson
 
 from processes.echo import Echo
 
-import iui
+import uiparse
 
 #http://127.0.0.1:5000/wps?REQUEST=GetCapabilities&SERVICE=WPS&VERSION=1.0.0
 
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     if args.newpickle or not os.path.exists(ppath):
         print "Parsing InVEST metadata from package"
-        invest = iui.process_generator()
+        invest = uiparse.process_generator()
         print "Pickling InVEST"
         dill.dump(invest, open(ppath, 'w'))
 
