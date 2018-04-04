@@ -21,6 +21,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import dill
+
 import os
 import flask
 
@@ -44,6 +46,25 @@ import iui
 #http://127.0.0.1:5000/wps?REQUEST=GetCapabilities&SERVICE=WPS&VERSION=1.0.0
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="InVEST WPS Server")
+    parser.add_argument("-n", "--newpickle",
+                        help="Creates a new pickle of the InVEST processes",
+                        action="store_true")    
+    parser.add_argument('-d',
+                        '--daemon',
+                        action='store_true',
+                        help="run in daemon mode")
+    parser.add_argument('-a',
+                        '--all-addresses',
+                        action='store_true',
+                        help="run flask using IPv4 0.0.0.0 (all network interfaces),"  +  
+                            "otherwise bind to 127.0.0.1 (localhost).  This maybe necessary in systems that only run Flask")
+    args = parser.parse_args()
+
+    ppath = os.path.join(os.path.dirname(__file__),"invest.p")
+    
     app = flask.Flask(__name__)
 
     processes = [
@@ -59,8 +80,16 @@ if __name__ == "__main__":
         Echo()
     ]
 
-    print "Extending default process list with InVEST"
-    processes.extend(iui.process_generator())
+    if args.newpickle or not os.path.exists(ppath):
+        print "Parsing InVEST metadata from package"
+        invest = iui.process_generator()
+        print "Pickling InVEST"
+        dill.dump(invest, open(ppath, 'w'))
+
+    print "Loading InVEST pickle"
+    invest = dill.load(open(ppath))
+    print "Extending default process list with InVEST"    
+    processes.extend(invest)
     print "Finished processing InVEST"
 
     # For the process list on the home page
@@ -72,7 +101,7 @@ if __name__ == "__main__":
         process_descriptor[identifier] = abstract
 
     print "Starting PyWPS instance"
-    print processes
+    #print processes
     # This is, how you start PyWPS instance
     service = Service(processes, ['pywps.cfg'])
     print "PyWPS instance running"
@@ -119,40 +148,22 @@ if __name__ == "__main__":
         else:
             flask.abort(404)
 
-    if __name__ == "__main__":
-        import argparse
+    if args.all_addresses:
+        bind_host='0.0.0.0'
+    else:
+        bind_host='127.0.0.1'
 
-        parser = argparse.ArgumentParser(
-            description="""Script for starting an example PyWPS
-                           instance with sample processes""",
-            epilog="""Do not use this service in a production environment.
-             It's intended to be running in test environment only!
-            For more documentation, visit http://pywps.org/doc
-            """
-            )
-        parser.add_argument('-d', '--daemon',
-                            action='store_true', help="run in daemon mode")
-        parser.add_argument('-a','--all-addresses',
-                            action='store_true', help="run flask using IPv4 0.0.0.0 (all network interfaces),"  +  
-                                "otherwise bind to 127.0.0.1 (localhost).  This maybe necessary in systems that only run Flask") 
-        args = parser.parse_args()
-        
-        if args.all_addresses:
-            bind_host='0.0.0.0'
-        else:
-            bind_host='127.0.0.1'
+    if args.daemon:
+        pid = None
+        try:
+            pid = os.fork()
+        except OSError as e:
+            raise Exception("%s [%d]" % (e.strerror, e.errno))
 
-        if args.daemon:
-            pid = None
-            try:
-                pid = os.fork()
-            except OSError as e:
-                raise Exception("%s [%d]" % (e.strerror, e.errno))
-
-            if (pid == 0):
-                os.setsid()
-                app.run(threaded=True,host=bind_host)
-            else:
-                os._exit(0)
-        else:
+        if (pid == 0):
+            os.setsid()
             app.run(threaded=True,host=bind_host)
+        else:
+            os._exit(0)
+    else:
+        app.run(threaded=True,host=bind_host)
