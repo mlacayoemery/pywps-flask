@@ -10,7 +10,10 @@ data_types = {"folder" : "LiteralData",
               "text" : "LiteralData",
               "file" : "ComplexData",
               "checkbox" : "LiteralData",
-              "dropdown" : "LiteralData"}
+              "dropdown" : "LiteralData",
+              "float" : "LiteralData",
+              "multi" : "ComplexData",
+              "OGRFieldDropdown" : "ComplexData"}
 
 ignore = ["natcap.invest.coastal_vulnerability.coastal_vulnerability",
           "natcap.invest.fisheries.fisheries_hst",
@@ -18,60 +21,87 @@ ignore = ["natcap.invest.coastal_vulnerability.coastal_vulnerability",
           "natcap.invest.wind_energy.wind_energy",
           "natcap.invest.fisheries.fisheries",
           "natcap.invest.finfish_aquaculture.finfish_aquaculture",
-          "natcap.invest.habitat_risk_assessment.hra_preprocessor"]
+          "natcap.invest.habitat_risk_assessment.hra_preprocessor",
+          "natcap.invest.pollination.pollination"]
 
-models = []
-for file_name in os.listdir(source_path):
-    if file_name.endswith(".json"):
-        model = json.load(open(os.path.join(source_path, file_name)))
+def parse_element(element):
+    if "type" in element.keys():
+        type_key = "type"
+    elif "dataType" in elements.keys():
+        type_key = "dataType"
+    else:
+        raise KeyError, "Element missing type"
 
-        identifier = model["targetScript"] #model["modelName"]
+    if element[type_key] == "label":
+        return None
 
-        if not identifier in ignore:           
-        
-            title = model["label"]
-            abstract = ""
+    e = {}
+    e["identifier"] = element["id"]
+    e["title"] = element["label"]
 
-            elements = model["elements"]
-            print "%s:%s" % (identifier, "-".join(["0"] * len(elements)))
-            options = []
-            if len(elements) > 1:
-                for e in elements:
+    try:
+        e["abstract"] = element["helpText"]
+    except KeyError:
+        e["abstract"] = ""
+
+    e["type"] = data_types[element[type_key]]
+
+    if e["type"] == "multi" or e["type"] == "checkbox" or element.get("required") == True:
+        e["minOccurs"] = 1
+    else:
+        e["minOccurs"] = 0
+
+    e["maxOccurs"] = 1
+
+    return e
+    
+if __name__ == "__main__":
+    models = []
+    for file_name in os.listdir(source_path):
+        if file_name.endswith(".json"):
+            print "\t\t\t\t%s" % file_name
+            model = json.load(open(os.path.join(source_path, file_name)))
+
+            identifier = model["targetScript"] #model["modelName"]
+
+            if not model["targetScript"] in ignore:           
+            
+                title = model["label"]
+                abstract = ""
+
+                element_list = model["elements"]
+
+                options = []
+                print "%s" % identifier
+                    
+                for e in element_list:
                     options.append(e["id"])
-            print "-".join(options)
-            elements=elements[0]["elements"]
+                print "options: %s" % ", ".join(options)
 
-            inputs = []
-            for e in elements:
-                if e["type"] != "label":
-                    i = {}
-                    i["identifier"] = e["id"] #= e["args_id"]
-                    i["title"] = e["label"]
+                for elements in element_list:
+                    print "variant: %s" % elements["id"]
+                    
+                    if "collapsible" in elements.keys():
+                        elements = elements["elements"][0]
 
-                    try:
-                        i["abstract"] = e["helpText"]
-                    except KeyError:
-                        i["abstract"] = ""
-
-                    i["type"] = data_types[e["type"]]
-
-                    if e["type"] == "checkbox":
-                        e["required"] = True
-
-                    if e["required"] == True:
-                        i["minOccurs"] = 1
+                    if "elements" in elements.keys():
+                        elements = elements["elements"]
                     else:
-                        i["minOccurs"] = 0
-                    i["maxOccurs"] = 1
+                        elements = [elements]
+                    
+                    inputs = []
+                    for e in elements:
+                        i = parse_element(e)
 
-                    print "\t%s" % i["identifier"]
-                    inputs.append(i)
+                        if i != None:
+                            print "\t%s" % i["identifier"]
+                            inputs.append(i)
 
-            models.append([identifier,
-                           title,
-                           abstract,
-                           inputs])
-        
-    #break
-        
-        
+                    models.append([identifier,
+                                   title,
+                                   abstract,
+                                   inputs])
+            
+        #break
+            
+            
