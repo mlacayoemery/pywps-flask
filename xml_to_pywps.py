@@ -67,12 +67,12 @@ def xml_to_pywps(xml, py):
 if __name__ == "__main__":
 ##    xml = get_describe_xml("http://127.0.0.1:8080/geoserver/ows", "JTS:area")
 
-    describe_process_path = os.path.join(os.path.dirname(__file__), "xml/JTS:area.xml")
+    for describe_process_path in os.path.join(os.path.dirname(__file__), "xml"):
+        if describe_process_path.endswith(".xml"):
+            head, tail = os.path.split(describe_process_path)
+            translator = string.maketrans(string.punctuation, "_" * len(string.punctuation))
+            tail = tail.rstrip(".xml").translate(translator) + ".py"
+            python_process_path = os.path.join(head, tail)  
 
-    head, tail = os.path.split(describe_process_path)
-    translator = string.maketrans(string.punctuation, "_" * len(string.punctuation))
-    tail = tail.rstrip(".xml").translate(translator) + ".py"
-    python_process_path = os.path.join(head, tail)
-
-    xml_to_pywps(open(describe_process_path).read(),
-                 open(python_process_path, 'w'))
+            xml_to_pywps(open(describe_process_path).read(),
+                         open(python_process_path, 'w'))
