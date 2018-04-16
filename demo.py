@@ -41,7 +41,9 @@ from processes.jsonprocess import TestJson
 
 from processes.echo import Echo
 
-import uiparse
+import importlib
+
+#import uiparse
 
 #http://127.0.0.1:5000/wps?REQUEST=GetCapabilities&SERVICE=WPS&VERSION=1.0.0
 
@@ -63,7 +65,7 @@ if __name__ == "__main__":
                             "otherwise bind to 127.0.0.1 (localhost).  This maybe necessary in systems that only run Flask")
     args = parser.parse_args()
 
-    ppath = os.path.join(os.path.dirname(__file__),"invest.p")
+    #ppath = os.path.join(os.path.dirname(__file__),"invest.p")
     
     app = flask.Flask(__name__)
 
@@ -80,17 +82,29 @@ if __name__ == "__main__":
         Echo()
     ]
 
-    if args.newpickle or not os.path.exists(ppath):
-        print "Parsing InVEST metadata from package"
-        invest = uiparse.process_generator()
-        print "Pickling InVEST"
-        dill.dump(invest, open(ppath, 'w'))
+    process_path = os.path.join(os.path.dirname(__file__), "xml")
 
-    print "Loading InVEST pickle"
-    invest = dill.load(open(ppath))
-    print "Extending default process list with InVEST"    
-    processes.extend(invest)
-    print "Finished processing InVEST"
+    for file_name in os.listdir(process_path):
+        if file_name != "__init__.py" and file_name.endswith(".py"):
+            m = importlib.import_module(".".join(["xml",
+                                                  os.path.splitext(file_name)[0]]))
+            c = getattr(m, "invest")
+            
+            processes.append(c())
+
+    
+
+##    if args.newpickle or not os.path.exists(ppath):
+##        print "Parsing InVEST metadata from package"
+##        invest = uiparse.process_generator()
+##        print "Pickling InVEST"
+##        dill.dump(invest, open(ppath, 'w'))
+##
+##    print "Loading InVEST pickle"
+##    invest = dill.load(open(ppath))
+##    print "Extending default process list with InVEST"    
+##    processes.extend(invest)
+##    print "Finished processing InVEST"
 
     # For the process list on the home page
     print "Generating metadata for home page"
