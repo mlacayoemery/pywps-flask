@@ -58,7 +58,7 @@ def xml_to_pywps(xml, py):
     wps = owslib.wps.WebProcessingService("", verbose=False, skip_caps=True)
     process = wps.describeprocess("", xml=xml)
 
-    print dir(process)
+    #print dir(process)
     
     py.write(pywps_header())
     py.write(pywps_class(process))    
@@ -67,12 +67,21 @@ def xml_to_pywps(xml, py):
 if __name__ == "__main__":
 ##    xml = get_describe_xml("http://127.0.0.1:8080/geoserver/ows", "JTS:area")
 
-    for describe_process_path in os.path.join(os.path.dirname(__file__), "xml"):
+    print "Generating PyWPS scripts from WPS XML"
+    xml_path = os.path.join(os.path.dirname(__file__), "xml_py")
+    for describe_process_path in os.listdir(xml_path):
         if describe_process_path.endswith(".xml"):
-            head, tail = os.path.split(describe_process_path)
+            print "Processing %s" % describe_process_path
+            stem, _ = os.path.splitext(describe_process_path)
+
             translator = string.maketrans(string.punctuation, "_" * len(string.punctuation))
-            tail = tail.rstrip(".xml").translate(translator) + ".py"
-            python_process_path = os.path.join(head, tail)  
+            stem = stem.translate(translator) + ".py"
+
+            describe_process_path = os.path.join(xml_path,
+                                                 describe_process_path)
+            
+            python_process_path = os.path.join(xml_path,
+                                               stem)  
 
             xml_to_pywps(open(describe_process_path).read(),
                          open(python_process_path, 'w'))

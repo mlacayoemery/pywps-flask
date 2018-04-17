@@ -82,11 +82,11 @@ if __name__ == "__main__":
         Echo()
     ]
 
-    process_path = os.path.join(os.path.dirname(__file__), "xml")
+    process_path = os.path.join(os.path.dirname(__file__), "xml_py")
 
     for file_name in os.listdir(process_path):
         if file_name != "__init__.py" and file_name.endswith(".py"):
-            m = importlib.import_module(".".join(["xml",
+            m = importlib.import_module(".".join(["xml_py",
                                                   os.path.splitext(file_name)[0]]))
             c = getattr(m, "invest")
             
