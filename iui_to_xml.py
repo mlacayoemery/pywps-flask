@@ -22,7 +22,16 @@ ignore = ["natcap.invest.coastal_vulnerability.coastal_vulnerability",
           "natcap.invest.fisheries.fisheries",
           "natcap.invest.finfish_aquaculture.finfish_aquaculture",
           "natcap.invest.habitat_risk_assessment.hra_preprocessor",
-          "natcap.invest.pollination.pollination"]
+          "natcap.invest.pollination.pollination",
+          "natcap.invest.coastal_blue_carbon.preprocessor",
+          "natcap.invest.scenario_generator.scenario_generator",
+          "natcap.invest.recreation.recmodel_client",
+          "natcap.invest.coastal_blue_carbon.coastal_blue_carbon",
+          "natcap.invest.seasonal_water_yield.seasonal_water_yield",
+          "natcap.invest.globio",
+          "natcap.invest.carbon",
+          "natcap.invest.wave_energy.wave_energy",
+          "natcap.invest.hydropower.hydropower_water_yield"]
 
 def parse_element(element):
     if "type" in element.keys():
@@ -59,7 +68,7 @@ if __name__ == "__main__":
     models = []
     for file_name in os.listdir(source_path):
         if file_name.endswith(".json"):
-            print "\t\t\t\t%s" % file_name
+            #print "\t\t\t\t%s" % file_name
             model = json.load(open(os.path.join(source_path, file_name)))
 
             identifier = model["targetScript"] #model["modelName"]
@@ -72,14 +81,22 @@ if __name__ == "__main__":
                 element_list = model["elements"]
 
                 options = []
-                print "%s" % identifier
+                print "\n%s" % identifier
                     
                 for e in element_list:
-                    options.append(e["id"])
+                    options.append(e["id"].replace("_container",""))
+
+                if options[0] == "workspace_list":
+                    options[0] = "base"
+                elif options[0] == "routedem_list":
+                    options[0] = "base"
+                else:
+                    raise ValueError, "workspace_list missing"
+
                 print "options: %s" % ", ".join(options)
 
                 for elements in element_list:
-                    print "variant: %s" % elements["id"]
+                    #print "variant: %s" % elements["id"]
                     
                     if "collapsible" in elements.keys():
                         elements = elements["elements"][0]
@@ -94,7 +111,7 @@ if __name__ == "__main__":
                         i = parse_element(e)
 
                         if i != None:
-                            print "\t%s" % i["identifier"]
+                            #print "\t%s" % i["identifier"]
                             inputs.append(i)
 
                     models.append([identifier,
