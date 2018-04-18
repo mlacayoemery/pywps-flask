@@ -2,8 +2,9 @@ import pywps
 
 class invest(pywps.Process):
     def __init__(self):
-        inputs = [pywps.LiteralInput('name', 'Input name', data_type='string')]
-        outputs = [pywps.LiteralOutput('response','Output response', data_type='string')]
+        inputs = [pywps.ComplexInput('geom', 'Input geometry', supported_formats=[pywps.Format('text/xml; subtype=gml/3.1.1'), pywps.Format('text/xml; subtype=gml/2.1.2'), pywps.Format('application/wkt'), pywps.Format('application/json'), pywps.Format('application/gml-3.1.1'), pywps.Format('application/gml-2.1.2')])]
+
+        outputs = [pywps.LiteralOutput('result', 'None', data_type='LiteralData')]
 
         super(invest, self).__init__(
             self._handler,
@@ -18,6 +19,4 @@ class invest(pywps.Process):
         )
 
     def _handler(self, request, response):
-        response.outputs['response'].data = "JTS:area process"
-        response.outputs['response'].uom = pywps.UOM('unity')
         return response

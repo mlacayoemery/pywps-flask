@@ -21,9 +21,58 @@ def pywps_class(process):
     block = block + """\n\nclass invest(pywps.Process):
     def __init__(self):"""
 
-    block = block + """\n        inputs = [pywps.LiteralInput('name', 'Input name', data_type='string')]"""
+    block = block + """\n        inputs = [%s]"""
 
-    block = block + """\n        outputs = [pywps.LiteralOutput('response','Output response', data_type='string')]"""
+    inputs = []
+    literal_input_template = "pywps.LiteralInput('%s', '%s', data_type='%s')"
+    complex_input_template = "pywps.ComplexInput('%s', '%s', supported_formats=[%s])"
+    format_template = "pywps.Format('%s')"
+    for parameter in process.dataInputs:
+        if parameter.dataType == "LiteralInput":
+            inputs.append(literal_input_template % (parameter.identifier,
+                                                    parameter.abstract,
+                                                    parameter.dataType))
+        elif parameter.dataType == "ComplexData":
+            formats = []
+            for value in parameter.supportedValues:
+                formats.append(format_template % value.mimeType)
+
+            inputs.append(complex_input_template % (parameter.identifier,
+                                                    parameter.abstract,
+                                                    ", ".join(formats)))             
+        else:
+            raise ValueError, "parameter type %s" % parameter.dataType
+
+    block = block % ", ".join(inputs)
+
+    block = block + """\n\n        outputs = [%s]"""
+
+    outputs = []
+    literal_output_template = "pywps.LiteralOutput('%s', '%s', data_type='%s')"
+    complex_output_template = "pywps.ComplexInput('%s', '%s', supported_formats=[%s])"
+    format_template = "pywps.Format('%s')"
+
+    for parameter in process.processOutputs:
+        
+        if parameter.dataType == "LiteralData":
+            print parameter.identifier
+            outputs.append(literal_output_template % (parameter.identifier,
+                                                      parameter.abstract,
+                                                      parameter.dataType))
+        elif parameter.dataType == "ComplexData":
+            formats = []
+            for value in parameter.supportedValues:
+                formats.append(format_template % value.mimeType)
+
+            outputs.append(complex_output_template % (parameter.identifier,
+                                                      parameter.abstract,
+                                                      ", ".join(formats)))             
+
+        else:
+            raise ValueError, "parameter type %s" % parameter.dataType
+
+
+    block = block % ", ".join(outputs)
 
     block = block + """\n\n        super(invest, self).__init__(
             self._handler,
@@ -46,11 +95,7 @@ def pywps_class(process):
     
 def pywps_handler(message):
     block = """\n\n    def _handler(self, request, response):
-        response.outputs['response'].data = "%s process"
-        response.outputs['response'].uom = pywps.UOM('unity')
         return response"""
-
-    block = block % message
 
     return block
 
@@ -63,6 +108,8 @@ def xml_to_pywps(xml, py):
     py.write(pywps_header())
     py.write(pywps_class(process))    
     py.write(pywps_handler(process.identifier))
+
+    return process
 
 if __name__ == "__main__":
 ##    xml = get_describe_xml("http://127.0.0.1:8080/geoserver/ows", "JTS:area")
@@ -83,5 +130,7 @@ if __name__ == "__main__":
             python_process_path = os.path.join(xml_path,
                                                stem)  
 
-            xml_to_pywps(open(describe_process_path).read(),
-                         open(python_process_path, 'w'))
+            process = xml_to_pywps(open(describe_process_path).read(),
+                                   open(python_process_path, 'w'))
+
+            break
