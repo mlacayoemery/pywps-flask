@@ -4,7 +4,7 @@ class invest(pywps.Process):
     def __init__(self):
         inputs = [pywps.ComplexInput('geom', 'Input geometry', supported_formats=[pywps.Format('text/xml; subtype=gml/3.1.1'), pywps.Format('text/xml; subtype=gml/2.1.2'), pywps.Format('application/wkt'), pywps.Format('application/json'), pywps.Format('application/gml-3.1.1'), pywps.Format('application/gml-2.1.2')])]
 
-        outputs = [pywps.LiteralOutput('result', 'None', data_type='LiteralData')]
+        outputs = [pywps.LiteralOutput('result', 'None', data_type='string')]
 
         super(invest, self).__init__(
             self._handler,
