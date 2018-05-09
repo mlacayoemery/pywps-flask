@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import dill
+#import dill
 
 import os
 import flask
@@ -53,7 +53,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="InVEST WPS Server")
     parser.add_argument("-n", "--newpickle",
                         help="Creates a new pickle of the InVEST processes",
+                        action="store_true")
+    parser.add_argument("-b", "--base",
+                        help="Run without the InVEST processes",
                         action="store_true")    
+
     parser.add_argument('-d',
                         '--daemon',
                         action='store_true',
@@ -82,15 +86,16 @@ if __name__ == "__main__":
         Echo()
     ]
 
-    process_path = os.path.join(os.path.dirname(__file__), "xml_py")
+    if not args.base:
+        process_path = os.path.join(os.path.dirname(__file__), "xml_py")
 
-    for file_name in os.listdir(process_path):
-        if file_name != "__init__.py" and file_name.endswith(".py"):
-            m = importlib.import_module(".".join(["xml_py",
-                                                  os.path.splitext(file_name)[0]]))
-            c = getattr(m, "invest")
-            
-            processes.append(c())
+        for file_name in os.listdir(process_path):
+            if file_name != "__init__.py" and file_name.endswith(".py"):
+                m = importlib.import_module(".".join(["xml_py",
+                                                      os.path.splitext(file_name)[0]]))
+                c = getattr(m, "invest")
+                
+                processes.append(c())
 
     
 
