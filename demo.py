@@ -87,12 +87,14 @@ if __name__ == "__main__":
     ]
 
     if not args.base:
+        print "Adding xml_py processes."
         process_path = os.path.join(os.path.dirname(__file__), "xml_py")
 
         for file_name in os.listdir(process_path):
             if file_name != "__init__.py" and file_name.endswith(".py"):
                 m = importlib.import_module(".".join(["xml_py",
                                                       os.path.splitext(file_name)[0]]))
+                print "Found module %s" % m
                 c = getattr(m, "invest")
                 
                 processes.append(c())
