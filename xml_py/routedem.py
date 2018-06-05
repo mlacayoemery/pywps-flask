@@ -5,6 +5,9 @@ import natcap.invest.routing.routedem
 import tempfile
 import os.path
 
+import logging
+import sys
+
 class invest(pywps.Process):
     def __init__(self):
         inputs = [pywps.LiteralInput("calculate_downstream_distance",
@@ -44,6 +47,10 @@ class invest(pywps.Process):
         )
 
     def _handler(self, request, response):
+        logger = logging.getLogger("natcap.invest.routing.routedem")
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(logging.StreamHandler(sys.stdout))
+        
         args = {
             u'calculate_downstream_distance': request.inputs["calculate_downstream_distance"][0].data,
             u'calculate_flow_accumulation': request.inputs["calculate_flow_accumulation"][0].data,
