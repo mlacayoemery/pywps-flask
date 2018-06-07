@@ -65,6 +65,6 @@ class invest(pywps.Process):
         natcap.invest.routing.routedem.execute(args)
 
         response.outputs['route'].file = os.path.join(args[u'workspace_dir'],
-                                                      "route.tif")
+                                                      "flow_direction.tif")
 
         return response
